@@ -1,12 +1,6 @@
 openapi: 3.0.3
 info:
   title: QI API
-  termsOfService: http://swagger.io/terms/
-  contact:
-    email: apiteam@swagger.io
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 0.0.1 
 paths:
   /getLastUpdatesDate:
