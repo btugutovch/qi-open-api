@@ -3,29 +3,6 @@ info:
   title: QI API
   version: 0.0.1 
 paths:
-  /getLastUpdatesDate:
-    get:
-      tags:
-        - Last Update Date
-      description: Return sLast Claims and EHR updates. Should take a type as a param to get  specific value, either Claims or EHR. Expected return is date string
-      operationId: getLastUpdatesDate
-      parameters: 
-        - name: type
-          in: query
-          description: example Claims, EHR
-          required: true
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Date'   
-      security:
-        - api_key: []
         
   /getClosedQualityGaps:
     get:
@@ -45,16 +22,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: dateStart
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: dateEnd
-          in: query
-          schema:
-            type: string
-            format: date
         - name: assignment
           in: query
           schema:
@@ -90,16 +57,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: dateStart
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: dateEnd
-          in: query
-          schema:
-            type: string
-            format: date
         - name: assignment
           in: query
           schema:
@@ -118,17 +75,19 @@ paths:
       security:
         - api_key: []  
         
-  /getMeasure:
+  /getMeasuresData:
     get:
       tags:
         - Measure Data
       summary: Expected return is either one or list of measures
-      operationId: getMeasure
+      operationId: getMeasuresData
       parameters:
-        - name: name
+        - name: id
           in: query
           schema:
-            type: string
+            type: array
+            items:
+              type: string
         - name: tierNum
           in: query
           required: true
@@ -140,16 +99,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: dateStart
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: dateEnd
-          in: query
-          schema:
-            type: string
-            format: date
         - name: assignment
           in: query
           schema:
@@ -171,17 +120,13 @@ paths:
       security:
         - api_key: []  
         
-  /measureInfo:
+  /getMeasures:
     get:
       tags:
         - Measure Data
       summary: Get specific measure general info/message
-      operationId: measureInfo
+      operationId: getMeasures
       parameters:
-        - name: name
-          in: query
-          schema:
-            type: string
         - name: tierNum
           in: query
           required: true
@@ -202,17 +147,17 @@ paths:
                $ref: '#/components/schemas/MeasureInfo'
       security:
         - api_key: []   
-  /measurePatients:
+  /getMeasurePatients:
     get:
       tags:
         - Measure Data
       summary: Get measure patients. (Add filter params?)
-      operationId: measurePatients
+      operationId: getMeasurePatients
       parameters:
-        - name: name
+        - name: measureID
           in: query
           schema:
-            type: string
+            type: number
         - name: tierNum
           in: query
           required: true
@@ -224,6 +169,22 @@ paths:
           required: true
           schema:
             type: string
+        - name: assignment
+          in: query
+          schema:
+            type: string
+        - name: dataFeeds
+          in: query
+          schema:
+            type: string
+        - name: numPatients
+          in: query
+          schema:
+            type: number
+        - name: patientStart
+          in: query
+          schema:
+            type: number
       responses:
         '200':
           description: successful operation
@@ -233,81 +194,6 @@ paths:
                $ref: '#/components/schemas/Patient'
       security:
         - api_key: []   
-  /store/order:
-    post:
-      tags:
-        - store
-      summary: Place an order for a pet
-      description: Place a new order in the store
-      operationId: placeOrder
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Order'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Order'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Order'
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'
-        '405':
-          description: Invalid input
-  /store/order/{orderId}:
-    get:
-      tags:
-        - store
-      summary: Find purchase order by ID
-      description: For valid response try integer IDs with value <= 5 or > 10. Other values will generate exceptions.
-      operationId: getOrderById
-      parameters:
-        - name: orderId
-          in: path
-          description: ID of order that needs to be fetched
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Order'          
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/Order'
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Order not found
-    delete:
-      tags:
-        - store
-      summary: Delete purchase order by ID
-      description: For valid response try integer IDs with value < 1000. Anything above 1000 or nonintegers will generate API errors
-      operationId: deleteOrder
-      parameters:
-        - name: orderId
-          in: path
-          description: ID of the order that needs to be deleted
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Order not found
 components:
   schemas:
     Order:
@@ -364,36 +250,36 @@ components:
     Measure:
       type: object
       properties:
-        id: # is needed to pull more details from the DB
+        measureId: # is needed to pull more details from the DB
           type: number
           example: 1
-        name: # is needed to pull more details from the DB
-          type: string
-          example: 'BreastCancerScreening'
-        title:
-          type: string
-          example: 'Breast Cancer Screening'
-        description: # tooltip
-          type: string
-          example: 'Lorem ipsum dolor sit amet'
         numerator: 
           type: integer
           example: 40
         denominator: 
           type: integer
           example: 100
-        target: 
-          type: integer
-          example: 50
+        exclusion: 
+          type: string
+          example: 'abc'
       xml:
         name: measure
         
     MeasureInfo:
       type: object
       properties:
-        message:  # need to clarify this schema
+        message:  
           type: string
           example: "Lorem ipsum dolor sit amet"
+        description:  
+          type: string
+          example: "Lorem ipsum dolor sit amet"
+        signifyHealthAverageByYear:  
+          type: number
+          example: 100
+        nationalAverageByYear:  
+          type: number
+          example: 100
       xml:
         name: measureInfo
         
